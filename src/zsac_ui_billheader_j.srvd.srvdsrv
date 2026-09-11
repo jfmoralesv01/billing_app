@@ -1,0 +1,5 @@
+@EndUserText.label: 'Service Definition of Bill Doc Head'
+define service ZSAC_UI_BillHeader_j {
+  expose zsac_c_billheader_j as BillingDocumentHeader;
+  expose ZSAC_C_Bill_Item_j  as BillingDocumentItem;
+}
