@@ -9,7 +9,9 @@ CLASS lhc_ZSAC_I_BILL_HEADER_j DEFINITION INHERITING FROM cl_abap_behavior_handl
       IMPORTING entities FOR CREATE zsac_i_bill_header_j.
 
     METHODS validateamount FOR VALIDATE ON SAVE
-     IMPORTING keys FOR zsac_i_bill_header_j~validateamount.
+      IMPORTING keys FOR zsac_i_bill_header_j~validateamount.
+    METHODS updatebillingdate FOR MODIFY
+      IMPORTING keys FOR ACTION zsac_i_bill_header_j~updatebillingdate RESULT result.
 
 ENDCLASS.
 
@@ -51,7 +53,7 @@ CLASS lhc_ZSAC_I_BILL_HEADER_j IMPLEMENTATION.
         RESULT DATA(lt_billdoc).
 
     LOOP AT lt_billdoc INTO DATA(ls_billdoc).
-      IF ls_billdoc-NetAmount IS NOT INITIAL AND ls_billdoc-NetAmount < 1000.
+      IF ls_billdoc-NetAmount IS INITIAL OR ls_billdoc-NetAmount < 1000.
         APPEND VALUE #( %tky = ls_billdoc-%tky ) TO failed-zsac_i_bill_header_j.
         APPEND VALUE #( %tky = ls_billdoc-%tky
                         %element-NetAmount = if_abap_behv=>mk-on
@@ -60,6 +62,30 @@ CLASS lhc_ZSAC_I_BILL_HEADER_j IMPLEMENTATION.
                        ) TO reported-zsac_i_bill_header_j.
       ENDIF.
     ENDLOOP.
+
+  ENDMETHOD.
+
+  METHOD updateBillingDate.
+
+    MODIFY ENTITIES OF ZSAC_I_BILL_HEADER_j IN LOCAL MODE
+            ENTITY ZSAC_I_BILL_HEADER_j
+               UPDATE FROM VALUE #( FOR key IN keys
+               ( %tky   = key-%tky
+                 BillDate = cl_abap_context_info=>get_system_date( )
+                 %control-BillDate = if_abap_behv=>mk-on ) )
+               FAILED failed
+               REPORTED reported.
+
+    "Read changed data for action result
+    READ ENTITIES OF ZSAC_I_BILL_HEADER_j IN LOCAL MODE
+      ENTITY ZSAC_I_BILL_HEADER_j
+      ALL FIELDS WITH
+      CORRESPONDING #( keys )
+      RESULT DATA(lt_billdocs).
+
+    result = VALUE #( FOR ls_billdoc IN lt_billdocs
+             ( %tky   = ls_billdoc-%tky
+               %param = ls_billdoc ) ).
 
   ENDMETHOD.
 

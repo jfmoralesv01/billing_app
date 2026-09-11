@@ -21,6 +21,9 @@ etag master LocalLastChangeDat
 
   field ( readonly : update, mandatory : create ) BillId;
 
+  //Action
+  action updateBillingDate result [1] $self;
+
  // Validation definition
   validation validateAmount on save { field NetAmount; create; update; }
 

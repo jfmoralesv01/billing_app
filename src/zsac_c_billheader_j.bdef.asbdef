@@ -15,6 +15,8 @@ define behavior for zsac_c_billheader_j //alias <alias_name>
   use action Discard;
   use action Prepare;
 
+  use action updateBillingDate;
+
   use association _item { create; with draft; }
 }
 
